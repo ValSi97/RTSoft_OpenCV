@@ -76,7 +76,7 @@ int main(int argc, const char** argv)
 
 		}
 		//покадровая запись в видео
-		int res = cvWriteFrame(writer, frame);
+		//int res = cvWriteFrame(writer, frame);
 
 		//cvShowImage("original", writer);
 		cvShowImage("original", gray);
