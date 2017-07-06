@@ -82,52 +82,10 @@ void arr_output_to_screen(double arr[2][15])
 	}
 }
 
-//функция сравнения схожести по гистограмме, занесения данных в массив 
-void compare_and_sort(int i) {
-	Mat h1 = read_hist_from_file(i);
-		//заполнение массива 
-	for (int j = 0; j < 15; j++)
-	{
-		if ((j + 1) != i)
-		{
-			Mat h2 = read_hist_from_file(j + 1);
-			compare_hists_arr[0][j] = j + 1;
-			double compare_res = compareHist(h1, h2, CV_COMP_CORREL);
-			compare_hists_arr[1][j] = compare_res;
-		}
-		else
-			compare_hists_arr[0][i - 1] = i;
-			compare_hists_arr[1][i - 1] = 1;
-	}
-
-	cout << "\nOriginal massive\n" << endl;
-	arr_output_to_screen(compare_hists_arr);
-	//сортировка массива 
-	for (int i = 0; i < 14; ++i)
-	{
-		for (int j = 0; j<14; ++j)
-		{
-			if (compare_hists_arr[1][j] < compare_hists_arr[1][j + 1])
-			{
-				double tmp = compare_hists_arr[1][j + 1];
-				compare_hists_arr[1][j + 1] = compare_hists_arr[1][j];
-				compare_hists_arr[1][j] = tmp;
-
-				tmp = compare_hists_arr[0][j + 1];
-				compare_hists_arr[0][j + 1] = compare_hists_arr[0][j];
-				compare_hists_arr[0][j] = tmp;
-			}
-		}
-	}
-	cout << "\nSorted massive\n" << endl;
-	arr_output_to_screen(compare_hists_arr);
-}
-
 void write_sorted_images()
 {
-	for (int i = 1; i <= 15; i++) {
-		string image_name1 = "images/" + to_string((int)compare_hists_arr[0][i-1]);
-		string image_name = image_name1 + ".jpg";
+	for (int i = 0; i < 15; i++) {
+		string image_name = vec[i].get_name();
 		Mat image = imread(image_name);
 
 		string image_name2 = "sorted_images/" + to_string(i);
@@ -179,9 +137,6 @@ int main(int, char**) {
 		string image_name = image_name1 + ".jpg";
 		Mat image = imread(image_name);
 
-		//namedWindow("Original", CV_WINDOW_AUTOSIZE); //create a window called "MyVideo"
-		//imshow("Original", image);
-
 		cvtColor(image, gray, COLOR_BGR2GRAY); // Перевод в градации серого
 
 		int histSize = 256; // bin size
@@ -221,12 +176,8 @@ int main(int, char**) {
 		cout << "Image:\t" << vec[i].get_name() << "\tSimilarity:\t" << round(compareHist(vec[0].get_hist(), vec[i].get_hist(), CV_COMP_CORREL) * 100) / 100 << endl;
 	}
 	cout << endl;
-	cout << "\nSorting images with help of massiv, metod" <<"Puzireck\n" << endl;
-	compare_and_sort(number); // функция расчета схожести и сортировки массива 
-	//double (*pointer)[2][15] = &compare_hists_arr;
 	write_sorted_images(); //запись в порядке уменьшения схожести сортированных картинок относительно выбранной в отдельную папку sorted_images
 
 	cv::waitKey(5000);
 	system("pause");
 }
-
