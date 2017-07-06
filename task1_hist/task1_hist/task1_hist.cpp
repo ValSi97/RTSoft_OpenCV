@@ -11,6 +11,47 @@ using namespace cv;
 FileStorage fs;
 string filename = "histograms/histogram.yml";
 double compare_hists_arr[2][15];
+int number;
+
+class Img {
+	string name;
+	Mat hist;
+public:
+	Img(string nname, Mat hhist);
+	Img();
+	~Img();
+	string get_name();
+	Mat get_hist();
+};
+Img::Img(string nname, Mat hhist)
+{
+
+	name = nname;
+	hist = hhist;
+
+}
+Img::Img()
+{
+	name = " ";
+	hist = 0;
+}
+
+Img::~Img()
+{
+
+}
+Mat Img::get_hist()
+{
+	return hist;
+}
+
+string Img::get_name()
+{
+	return name;
+}
+
+vector<Img> vec;
+
 // функция записи гистограмм в файл
 void write_hist_to_file(Mat hist,int i)
 {
@@ -100,6 +141,33 @@ void write_sorted_images()
 	}
 }
 
+bool compare_images(Img i, Img j, int numb)
+{
+	Mat h1 = read_hist_from_file(numb);
+	int index = 0;
+	double compare_res1 = compareHist(h1, i.get_hist(), CV_COMP_CORREL);
+	double compare_res2 = compareHist(h1, j.get_hist(), CV_COMP_CORREL);
+	if (compare_res1 > compare_res2)
+		return 1;
+	else
+		return 0;
+}
+
+
+class sort_class
+{
+	int numb;
+	public:
+		sort_class(int nnumb) {
+			numb = nnumb;
+		}
+		bool operator() (Img i, Img j)
+	{
+
+		return compare_images(i,j,numb);
+	}
+} ;
+
 
 
 int main(int, char**) {
@@ -123,6 +191,9 @@ int main(int, char**) {
 		Mat hist;
 		calcHist(&gray, 1, 0, Mat(), hist, 1, &histSize, ranges, true, false); // Calculate histogram
 		write_hist_to_file(hist, i);//Write histograms to file function
+
+		Img image_obj(image_name, hist); //Создаем объект класса Image
+		vec.push_back(image_obj); //Записываем его в вектор
 		
 		cout << "\nHistogramm of image with name: "<< i <<".jpg\n"<<endl;
 		for (int h = 0; h < histSize; h++) { // Show the calculated histogram in command window
@@ -135,12 +206,23 @@ int main(int, char**) {
 	}
 	fs.release();
 
-	int number; // ввод номера картинки для сравнения схожести и сортировки относительно ее
+	// ввод номера картинки для сравнения схожести и сортировки относительно ее
 	cout << "\nInput number of image (1 to 15), which will be compare" << endl;
 	cin >> number;
 
 	read_hist_from_file(number);// прочитать гистограмму из файла
-	compare_and_sort(number); // функция расчета схожести и сортировки массива
+
+	sort_class sc(number);
+	sort(vec.begin(), vec.end(), sc);
+
+	cout << "Sorting images with functor\n" << endl;
+	for (int i = 0; i < vec.size(); ++i)
+	{
+		cout << "Image:\t" << vec[i].get_name() << "\tSimilarity:\t" << round(compareHist(vec[0].get_hist(), vec[i].get_hist(), CV_COMP_CORREL) * 100) / 100 << endl;
+	}
+	cout << endl;
+	cout << "\nSorting images with help of massiv, metod" <<"Puzireck\n" << endl;
+	compare_and_sort(number); // функция расчета схожести и сортировки массива 
 	//double (*pointer)[2][15] = &compare_hists_arr;
 	write_sorted_images(); //запись в порядке уменьшения схожести сортированных картинок относительно выбранной в отдельную папку sorted_images
 
