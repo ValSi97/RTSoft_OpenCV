@@ -1,0 +1,8 @@
+﻿cl : командная строка warning D9002: пропуск неизвестного параметра "/entry:mainCRTStartup Source.cpp"
+  glu32.lib
+c1xx : fatal error C1083: Не удается открыть файл источник: glu32.lib: No such file or directory
+  OPENGL32.lib
+c1xx : fatal error C1083: Не удается открыть файл источник: OPENGL32.lib: No such file or directory
+  glut32.lib
+c1xx : fatal error C1083: Не удается открыть файл источник: glut32.lib: No such file or directory
+  Создание кода...
